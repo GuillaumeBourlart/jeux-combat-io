@@ -1,6 +1,7 @@
 {
   "name": "my-topdown-game-server",
   "version": "1.0.0",
+  "type": "module",
   "description": "Serveur Node.js de jeu top-down combat (Express + Socket.IO)",
   "main": "server.js",
   "scripts": {
