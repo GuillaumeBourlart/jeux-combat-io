@@ -1,0 +1,21 @@
+{
+  "name": "my-topdown-game-server",
+  "version": "1.0.0",
+  "description": "Serveur Node.js de jeu top-down combat (Express + Socket.IO)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "author": "TON_PSEUDO",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "socket.io": "^4.5.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  }
+}
