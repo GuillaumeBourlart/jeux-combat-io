@@ -16,7 +16,7 @@ const httpServer = createServer(app);
 const io = new Server(httpServer, { cors: { origin: "*" } });
 
 // World & view
-const worldSize = { width: 4000, height: 4000 };
+const worldSize = { width: 2000, height: 2000 };
 const VIEW_WIDTH = 1920, VIEW_HEIGHT = 1080;
 
 // Items
