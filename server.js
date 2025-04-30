@@ -234,10 +234,11 @@ setInterval(() => {
   };
   // visible entities per player would be filtered client-side
   for (const [id, p] of Object.entries(room.players)) {
+    const angle = Math.atan2(p.direction.y, p.direction.x);
     payload.players[id] = {
       x: p.x, y: p.y,
       health: p.health, maxHealth: p.maxHealth,
-      exp: p.exp, level: p.level,
+      exp: p.exp, level: p.level, angle,
     };
   }
   payload.items = room.items;
