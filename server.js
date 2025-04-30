@@ -9,6 +9,7 @@ dotenv.config();
 const { PORT = 4000 } = process.env;
 const app = express();
 app.use(cors({ origin: "*" }));
+app.options("*", cors());
 app.use(express.json());
 
 const httpServer = createServer(app);
