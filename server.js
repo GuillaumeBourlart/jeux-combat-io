@@ -238,7 +238,8 @@ setInterval(() => {
     payload.players[id] = {
       x: p.x, y: p.y,
       health: p.health, maxHealth: p.maxHealth,
-      exp: p.exp, level: p.level, angle,
+      exp: p.exp, level: p.level, angle,                     // ← nouvel attribut
+      isAttacking: !p.canAttack  // ← true pendant la durée du swing
     };
   }
   payload.items = room.items;
