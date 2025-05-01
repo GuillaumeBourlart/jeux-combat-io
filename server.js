@@ -25,12 +25,19 @@ const MAX_ITEM_RADIUS = 10;
 const ITEM_COLORS = [
   "#FF5733", "#33FF57", "#3357FF", "#FF33A8", "#33FFF5", "#FFD133", "#8B5CF6"
 ];
-const INITIAL_ITEM_COUNT = 400;
+const INITIAL_ITEM_COUNT =100;
 
 // Level & health
 const EXP_PER_LEVEL_BASE = 10;      // base exp needed per level
 const HEALTH_PER_LEVEL = 2;         // max HP gained per level up
 const ATTACK_BUFFER_MS = 100;       // extra ms cannot attack after hit
+
+// Taille du personnage (carré)
+const PLAYER_SIZE = 40;        // ton côté du carré
+// Dimensions de l’arme (rectangle)
+const WEAPON_LENGTH   = 50;    // longueur de l’arme
+const WEAPON_THICKNESS = 10;   // épaisseur de l’arme
+
 
 // Knockback
 const KNOCKBACK_DISTANCE = 20;
@@ -233,15 +240,25 @@ setInterval(() => {
     items: []
   };
   // visible entities per player would be filtered client-side
-  for (const [id, p] of Object.entries(room.players)) {
-    const angle = Math.atan2(p.direction.y, p.direction.x);
-    payload.players[id] = {
-      x: p.x, y: p.y,
-      health: p.health, maxHealth: p.maxHealth,
-      exp: p.exp, level: p.level, angle,                     // ← nouvel attribut
-      isAttacking: !p.canAttack  // ← true pendant la durée du swing
-    };
-  }
+  
+for (const [id, p] of Object.entries(room.players)) {
+  const angle = Math.atan2(p.direction.y, p.direction.x);
+  payload.players[id] = {
+    x:         p.x,
+    y:         p.y,
+    health:    p.health,
+    maxHealth: p.maxHealth,
+    exp:       p.exp,
+    level:     p.level,
+    angle,                      // orientation
+    isAttacking: !p.canAttack,  // during swing
+    size:       PLAYER_SIZE,    // ← côté du carré
+    weapon: {                   // ← dimensions de l’arme
+      length:    WEAPON_LENGTH,
+      thickness: WEAPON_THICKNESS
+    }
+  };
+}
   payload.items = room.items;
 
   io.in("room-1").emit("gameState", payload);
