@@ -135,57 +135,53 @@ io.on("connection", socket => {
   });
 
   // Attack event
-  socket.on("attack", () => {
-    const p = room.players[socket.id];
-    if (!p || !p.canAttack) return;
-    p.canAttack = false;
-    const now = Date.now();
-    const endAttack = now + p.weapon.swingSpeed;
+ socket.on("attack", () => {
+  const p = room.players[socket.id];
+  if (!p || !p.canAttack) return;
+  p.canAttack = false;
 
-    // Check collision: simple front-arc hitbox
-    const ux = p.direction.x;
-    const uy = p.direction.y;
-    const perp = { x: -uy, y: ux };
-    const hitLength = p.weapon.size;
-    const hitWidth = p.weapon.size / 2;
+  // vecteur unitaire de facing
+  const ux = p.direction.x;
+  const uy = p.direction.y;
 
-    for (const [otherId, o] of Object.entries(room.players)) {
-      if (otherId === socket.id || o.health <= 0) continue;
-      // relative vector
-      const dx = o.x - p.x;
-      const dy = o.y - p.y;
-      // project onto forward and perp
-      const forwardDist = dx*ux + dy*uy;
-      const sideDist = Math.abs(dx*perp.x + dy*perp.y);
-      if (forwardDist > 0 && forwardDist <= hitLength && sideDist <= hitWidth) {
-        // hit
-        o.health -= p.weapon.damage;
-        // knockback
-        o.x += ux * KNOCKBACK_DISTANCE;
-        o.y += uy * KNOCKBACK_DISTANCE;
-        const { x: cx, y: cy } = clampPosition(o);
-        o.x = cx; o.y = cy;
-        // disable attack for victim briefly
-        setTimeout(() => {
-          o.canAttack = false;
-          setTimeout(() => { o.canAttack = true; }, ATTACK_BUFFER_MS);
-        }, 0);
+  // 1) point de pivot de l'arme, sur le bord avant du carré
+  const pivotX = p.x + ux * (PLAYER_SIZE / 2);
+  const pivotY = p.y + uy * (PLAYER_SIZE / 2);
 
-        // if killed
-        if (o.health <= 0) {
-          // drop items
-          dropItemsAt(o.x, o.y, 5, room);
-          // respawn as fresh player (or remove)
-          delete room.players[otherId];
-          io.to(otherId).emit("died");
-        }
-        break; // only one hit per attack
-      }
+  // 2) dimensions de la hitbox de l'arme
+  const hitLength = WEAPON_LENGTH;            // portée de l'arme
+  const hitWidth  = WEAPON_THICKNESS / 2;     // demi-épaisseur
+
+  // vecteur perpendiculaire pour la largeur de l’arc
+  const perpX = -uy;
+  const perpY = ux;
+
+  for (const [otherId, o] of Object.entries(room.players)) {
+    if (otherId === socket.id || o.health <= 0) continue;
+
+    // coordonnées relatives à pivot
+    const dx = o.x - pivotX;
+    const dy = o.y - pivotY;
+
+    // projection sur forward / perpendiculaire
+    const forwardDist = dx * ux + dy * uy;
+    const sideDist    = Math.abs(dx * perpX + dy * perpY);
+
+    if (forwardDist > 0 && forwardDist <= hitLength && sideDist <= hitWidth) {
+      // CIBLE TOUCHÉE
+      o.health -= p.weapon.damage;
+      // knockback depuis pivot
+      o.x += ux * KNOCKBACK_DISTANCE;
+      o.y += uy * KNOCKBACK_DISTANCE;
+      // …
+      break;
     }
+  }
 
-    // Reset attack availability
-    setTimeout(() => { p.canAttack = true; }, p.weapon.swingSpeed + ATTACK_BUFFER_MS);
-  });
+  // remise en attack
+  setTimeout(() => { p.canAttack = true; }, p.weapon.swingSpeed + ATTACK_BUFFER_MS);
+});
+
 
   // Disconnect
   socket.on("disconnect", () => {
